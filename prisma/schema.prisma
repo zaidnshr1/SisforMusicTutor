@@ -1,0 +1,150 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  SUPER_ADMIN
+  GURU
+  MURID
+}
+
+enum PaymentStatus {
+  LUNAS
+  TERLAMBAT
+  MENUNGGAK
+  BELUM_BAYAR
+}
+
+enum TransactionType {
+  PEMASUKAN
+  PENGELUARAN
+  GAJI_GURU
+  REVERSAL // Untuk entri pembalik
+}
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  password          String
+  role              Role      @default(MURID)
+  isVerified        Boolean   @default(false) // Untuk verifikasi email & approval guru
+  verificationToken String?   @unique
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  deletedAt         DateTime?
+
+  profile         Profile?
+  enrollments     Enrollment[]
+  reviews         Review[]
+  reports         Report[]
+  transactions    Transaction[]
+  teacherPayments TeacherPayment[]
+  classes         Class[]
+}
+
+model Profile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName    String
+  whatsapp    String?
+  domicile    String?
+  bio         String?
+  education   String?
+  experience  String?
+  speciality  String?
+  linkedinUrl String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Class {
+  id          String       @id @default(cuid())
+  title       String
+  description String
+  teacherId   String
+  teacher     User         @relation(fields: [teacherId], references: [id])
+  price       Float
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?
+  enrollments Enrollment[]
+  reviews     Review[]
+}
+
+model Enrollment {
+  id            String        @id @default(cuid())
+  studentId     String
+  student       User          @relation(fields: [studentId], references: [id])
+  classId       String
+  class         Class         @relation(fields: [classId], references: [id])
+  paymentStatus PaymentStatus @default(BELUM_BAYAR)
+  enrolledAt    DateTime      @default(now())
+  deletedAt     DateTime?
+
+  @@unique([studentId, classId])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int // 1-5
+  comment   String?
+  studentId String
+  student   User     @relation(fields: [studentId], references: [id])
+  classId   String
+  class     Class    @relation(fields: [classId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Report {
+  id          String    @id @default(cuid())
+  reporterId  String
+  reporter    User      @relation(fields: [reporterId], references: [id])
+  title       String
+  description String
+  isResolved  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+}
+
+model Transaction {
+  id            String          @id @default(cuid())
+  amount        Float
+  type          TransactionType
+  description   String
+  notes         String?
+  // Audit Trail Fields
+  userId        String
+  user          User            @relation(fields: [userId], references: [id])
+  ipAddress     String
+  deviceInfo    String
+  transactionAt DateTime        @default(now())
+
+  reversalForId  String?         @unique
+  reversalFor    Transaction?    @relation("Reversal", fields: [reversalForId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reversedBy     Transaction?    @relation("Reversal")
+  teacherPayment TeacherPayment[]
+}
+
+model TeacherPayment {
+  id            String      @id @default(cuid())
+  teacherId     String
+  teacher       User        @relation(fields: [teacherId], references: [id])
+  amount        Float
+  paymentDate   DateTime
+  notes         String?
+  transactionId String      @unique
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  createdAt     DateTime    @default(now())
+}
