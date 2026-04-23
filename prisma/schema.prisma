@@ -29,7 +29,7 @@ enum TransactionType {
   PEMASUKAN
   PENGELUARAN
   GAJI_GURU
-  REVERSAL // Untuk entri pembalik
+  REVERSAL
 }
 
 model User {
@@ -37,25 +37,23 @@ model User {
   email             String    @unique
   password          String
   role              Role      @default(MURID)
-  isVerified        Boolean   @default(false) // Untuk verifikasi email & approval guru
+  isVerified        Boolean   @default(false) // Untuk verifikasi email & approval guru oleh admin
   verificationToken String?   @unique
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
   deletedAt         DateTime?
 
-  profile         Profile?
-  enrollments     Enrollment[]
-  reviews         Review[]
-  reports         Report[]
-  transactions    Transaction[]
-  teacherPayments TeacherPayment[]
-  classes         Class[]
+  profile           Profile?
+  enrollments       Enrollment[]
+  reviews           Review[]
+  reports           Report[]
+  transactions      Transaction[]  @relation("UserInput")
+  teacherPayments   TeacherPayment[]
+  taughtClasses     Class[]          @relation("TeacherClasses")
 }
 
 model Profile {
   id          String   @id @default(cuid())
-  userId      String   @unique
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   fullName    String
   whatsapp    String?
   domicile    String?
@@ -66,56 +64,64 @@ model Profile {
   linkedinUrl String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Class {
   id          String       @id @default(cuid())
   title       String
   description String
-  teacherId   String
-  teacher     User         @relation(fields: [teacherId], references: [id])
   price       Float
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   deletedAt   DateTime?
+
+  // Relasi
+  teacherId   String
+  teacher     User         @relation("TeacherClasses", fields: [teacherId], references: [id])
   enrollments Enrollment[]
   reviews     Review[]
 }
 
 model Enrollment {
   id            String        @id @default(cuid())
+  paymentStatus PaymentStatus @default(BELUM_BAYAR)
+  enrolledAt    DateTime      @default(now())
+  deletedAt     DateTime?
+
   studentId     String
   student       User          @relation(fields: [studentId], references: [id])
   classId       String
   class         Class         @relation(fields: [classId], references: [id])
-  paymentStatus PaymentStatus @default(BELUM_BAYAR)
-  enrolledAt    DateTime      @default(now())
-  deletedAt     DateTime?
 
   @@unique([studentId, classId])
 }
 
 model Review {
   id        String   @id @default(cuid())
-  rating    Int // 1-5
+  rating    Int
   comment   String?
+  createdAt DateTime @default(now())
+
   studentId String
   student   User     @relation(fields: [studentId], references: [id])
   classId   String
   class     Class    @relation(fields: [classId], references: [id])
-  createdAt DateTime @default(now())
 }
 
 model Report {
   id          String    @id @default(cuid())
-  reporterId  String
-  reporter    User      @relation(fields: [reporterId], references: [id])
   title       String
   description String
   isResolved  Boolean   @default(false)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
+
+  reporterId  String
+  reporter    User      @relation(fields: [reporterId], references: [id])
 }
 
 model Transaction {
@@ -124,27 +130,30 @@ model Transaction {
   type          TransactionType
   description   String
   notes         String?
-  // Audit Trail Fields
-  userId        String
-  user          User            @relation(fields: [userId], references: [id])
-  ipAddress     String
-  deviceInfo    String
   transactionAt DateTime        @default(now())
 
-  reversalForId  String?         @unique
-  reversalFor    Transaction?    @relation("Reversal", fields: [reversalForId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  reversedBy     Transaction?    @relation("Reversal")
-  teacherPayment TeacherPayment[]
+  ipAddress     String
+  deviceInfo    String
+
+  userId        String
+  user          User   @relation("UserInput", fields: [userId], references: [id])
+
+  reversalForId String?      @unique
+  reversalFor   Transaction? @relation("Reversal", fields: [reversalForId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reversedBy    Transaction? @relation("Reversal")
+
+  teacherPayment TeacherPayment?
 }
 
 model TeacherPayment {
-  id            String      @id @default(cuid())
+  id          String   @id @default(cuid())
+  amount      Float
+  paymentDate DateTime
+  notes       String?
+  createdAt   DateTime @default(now())
+
   teacherId     String
   teacher       User        @relation(fields: [teacherId], references: [id])
-  amount        Float
-  paymentDate   DateTime
-  notes         String?
-  transactionId String      @unique
+  transactionId String      @unique 
   transaction   Transaction @relation(fields: [transactionId], references: [id])
-  createdAt     DateTime    @default(now())
 }
