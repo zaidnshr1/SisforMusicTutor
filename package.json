@@ -13,9 +13,12 @@
   "description": "Sistem Informasi kebutuhan bisnis kursus pelatihan keterampilan musik berbasis website",
   "dependencies": {
     "@prisma/client": "^7.8.0",
+    "bcrypt": "^6.0.0",
     "dotenv": "^17.4.2",
     "ejs": "^5.0.2",
     "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "nodemailer": "^8.0.5",
     "pg": "^8.20.0",
     "sequelize": "^6.37.8",
     "zod": "^4.3.6"
