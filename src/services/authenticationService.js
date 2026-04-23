@@ -45,3 +45,36 @@ export const registerUser = async (userData) => {
     return user;
 }
 
+export const verifyEmailToken = async (token) => {
+    const user = await prisma.user.findUnique({where : {verificationToken: token}});
+
+    if (!user) {
+        throw new Error("token tidak valid atau sudah digunakan");
+    }
+
+    return prisma.user.update({
+        where: {
+            isVerified: true,
+            verificationToken: null
+        }
+    });
+}
+
+export const userLogin = async (email, password) => {
+    const user = await prisma.user.findUnique({where: {email}});
+
+    if (!user) {
+        throw new Error("email atau password salah");
+    }
+
+    if (!user.isVerified) {
+        throw new Error("Akun anda belum terverfikasi. Silahkan cek email anda")
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+        throw new Error("email atau password salah");
+    }
+
+    return user;
+}
