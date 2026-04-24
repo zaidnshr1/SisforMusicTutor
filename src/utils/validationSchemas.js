@@ -11,7 +11,7 @@ export const registerSchema = z.object({
     path: ["confirmPassword"]
 })
 
-export const login = z.object({
+export const loginSchema = z.object({
     email: z.string().email("format email tidak valid"),
     password: z.string().min(1, "password tidak boleh kosong")
 })
