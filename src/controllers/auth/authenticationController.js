@@ -42,11 +42,11 @@ export const login = async (req, res) => {
 }
 
 export const logout = (req, res) => {
-    res.session.destroy((err) => {
-        if (err) {
-            return redirect("/dashboard");
-        }
-        res.clearCookie("connect.sid");
-        res.redirect("/auth/login");
-    });
-}
+  req.session.destroy((err) => {
+    if (err) {
+      return res.redirect("/dashboard");
+    }
+    res.clearCookie("connect.sid");
+    res.redirect("/auth/login");
+  });
+};

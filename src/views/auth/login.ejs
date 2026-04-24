@@ -11,8 +11,8 @@
      <p style="color: crimson;"><%= error %></p>
     <% } %>
     <form action="/auth/login" method="post">
-        <input type="email" name="email" placeholder="email" required><br>
-        <input type="password" name="password" placeholder="password">
+        <input type="email" name="email" placeholder="email" required value="<%= typeof oldData !== "undefined" ? oldData.email : "" %>"><br>
+        <input type="password" name="password" placeholder="password" required value="<%= typeof oldData !== "undefined" ? oldData.password : "" %>">
         <button type="submit">Login</button>
     </form>
 </body>

@@ -16,7 +16,7 @@ export const registerUser = async (userData) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const verificationToken = await crypto.randomBytes(32).toString("hex");
 
-    const user = prisma.user.create({
+    const user = await prisma.user.create({
         data: {
             email,
             password: hashedPassword,
@@ -53,7 +53,8 @@ export const verifyEmailToken = async (token) => {
     }
 
     return prisma.user.update({
-        where: {
+        where: {id: user.id},
+        data: {
             isVerified: true,
             verificationToken: null
             // !!!  BETTER NANTI INI DI UPDATE FITURNYA !!!

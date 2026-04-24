@@ -12,13 +12,13 @@
     <% } %>
 
     <form action="/auth/register" method="post">
-        <input type="text" name="fullname" placeholder="nama lengkap" required><br>
-        <input type="email" name="email" placeholder="email" required><br>
-        <input type="password" name="password" placeholder="password" required><br>
-        <input type="password" name="confirmPassword" placeholder="confirm password" required><br>
+        <input type="text" name="fullName" placeholder="nama lengkap" required value="<%= typeof oldData !== "undefined" ? oldData.fullName : "" %>"><br>
+        <input type="email" name="email" placeholder="email" required value="<%= typeof oldData !== "undefined" ? oldData.email : ""%>"><br>
+        <input type="password" name="password" placeholder="password" required value="<%= typeof oldData !== "undefined" ? oldData.password : "" %>"><br>
+        <input type="password" name="confirmPassword" placeholder="confirm password" required value="<%= typeof oldData !== "undefined" ? oldData.confirmPassword : "" %>"><br>
         <select name="role">
-            <option value="MURID">saya murid</option>
-            <option value="GURU">saya guru</option>
+            <option value="MURID" <%= (typeof oldData !== 'undefined' && oldData.role === 'GURU') ? 'selected' : '' %>>>saya murid</option>
+            <option value="GURU" <%= (typeof oldData !== 'undefined' && oldData.role === 'MURID') ? 'selected' : '' %>>>saya guru</option>
         </select><br>
         <button type="submit">Daftar</button>
     </form>

@@ -20,7 +20,7 @@ export const isAuthenticated = async (req, res, next) => {
 
     return res.render("auth/login", {
         oldData: req.body,
-        title: login,
+        title: "login",
         error: "email atau password salah"
     });
     
