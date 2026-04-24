@@ -1,7 +1,7 @@
-import prisma from "../../config/prisma";
+import prisma from "../../config/prisma.js";
 import bcrypt from "bcrypt"
 import crypto from "crypto";
-import transport from "../../config/mailer";
+import transport from "../../config/mailer.js";
 import { profile } from "console";
 import { create } from "domain";
 
@@ -56,6 +56,7 @@ export const verifyEmailToken = async (token) => {
         where: {
             isVerified: true,
             verificationToken: null
+            // !!!  BETTER NANTI INI DI UPDATE FITURNYA !!!
             // Logika untuk menghapus user yang tidak terverifikasi
             // setelah beberapa jam sebaiknya diimplementasikan
             // menggunakan cron job atau scheduled task yang berjalan secara periodik.

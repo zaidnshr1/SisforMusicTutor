@@ -3,6 +3,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import session from "express-session";
+import authRoutes from "./routes/auth/authRoutes.js";
+import {isAuthenticated} from "./middlewares/authMiddleware.js";
 
 const __fileName = fileURLToPath(import.meta.url);
 const __dirName = path.dirname(__fileName);
@@ -27,6 +29,18 @@ app.use(
         },
     })
 )
+
+app.use("/auth", authRoutes);
+
+app.get("/dashboard", isAuthenticated, (req, res) => {
+    res.send(`<h1>dashboard ${req.user.email}</h1>
+        <p>role anda: ${role}</p>
+        <form action="/auth/logout" method="post">
+        logout
+        <button type="submit">logout</button>
+        </form>
+    `)
+})
 
 app.get("/", (req, res) => {
     res.render("index", {title: "beranda"})

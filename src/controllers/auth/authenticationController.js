@@ -1,4 +1,4 @@
-import authService from "../../services/auth/authenticationService"
+import * as authService from "../../services/auth/authenticationService.js"
 
 export const showRegisterForm = (req, res) => {
     res.render("auth/register", {title: register, error: null});
@@ -37,6 +37,16 @@ export const login = async (req, res) => {
 
         res.redirect("/dashboard");
     } catch (error) {
-        res.render("/auth/login", {title: login, error: error.message});
+        res.render("auth/login", {title: login, error: error.message});
     }
+}
+
+export const logout = (req, res) => {
+    res.session.destroy((err) => {
+        if (err) {
+            return redirect("/dashboard");
+        }
+        res.clearCookie("connect.sid");
+        res.redirect("/auth/login");
+    });
 }
